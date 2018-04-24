@@ -32,7 +32,7 @@
     "mocha": "^4.0.1"
   },
   "dependencies": {
-    "request": "^2.83.0",
+    "axios": "^0.18.0",
     "uuid": "^3.1.0"
   }
 }

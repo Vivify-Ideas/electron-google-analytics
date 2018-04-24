@@ -1,4 +1,4 @@
-import request from 'request';
+import axios from 'axios';
 import uuidV4 from 'uuid/v4';
 
 class Analytics {
@@ -381,32 +381,29 @@ class Analytics {
         reqObj.headers = { 'User-Agent': this.globalUserAgent };
       }
 
-      return request.post(reqObj, (err, httpResponse, body) => {
-        if (err) return reject(err);
+      return axios.post(url, formObj, {
+        headers: (this.globalUserAgent !== '' ?
+          { 'User-Agent': this.globalUserAgent } : {})
+      })
+        .then(({ data, headers, status }) => {
+          if (status === 200) {
+            if (this.globalDebug) {
+              if (data.hitParsingResult[0].valid) {
+                return resolve({ clientID: formObj.cid });
+              }
 
-        let bodyJson = {};
-        if (body && (httpResponse.headers['content-type'] !== 'image/gif')) {
-          bodyJson = JSON.parse(body);
-        }
-
-        if (httpResponse.statusCode === 200) {
-          if (this.globalDebug) {
-            if (bodyJson.hitParsingResult[0].valid) {
-              return resolve({ clientID: formObj.cid });
+              return reject(data);
             }
-
-            return reject(bodyJson);
+            return resolve({ clientID: formObj.cid });
           }
 
-          return resolve({ clientID: formObj.cid });
-        }
+          if (headers['content-type'] !== 'image/gif') {
+            return reject(data);
+          }
 
-        if (httpResponse.headers['content-type'] !== 'image/gif') {
-          return reject(bodyJson);
-        }
-
-        return reject(body);
-      });
+          return reject(data);
+        })
+        .catch(error => reject(error));
     });
   }
 }
