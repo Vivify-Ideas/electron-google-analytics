@@ -1,5 +1,6 @@
 import axios from 'axios';
 import uuidV4 from 'uuid/v4';
+import querystring from 'querystring';
 
 class Analytics {
   /**
@@ -376,12 +377,7 @@ class Analytics {
         url = `${this.globalBaseURL}${this.globalDebugURL}${this.globalCollectURL}`;
       }
 
-      const reqObj = { url, form: formObj };
-      if (this.globalUserAgent !== '') {
-        reqObj.headers = { 'User-Agent': this.globalUserAgent };
-      }
-
-      return axios.post(url, formObj, {
+      return axios.post(url, querystring.stringify(formObj), {
         headers: (this.globalUserAgent !== '' ?
           { 'User-Agent': this.globalUserAgent } : {})
       })
